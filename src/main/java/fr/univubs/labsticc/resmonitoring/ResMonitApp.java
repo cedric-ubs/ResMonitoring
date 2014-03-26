@@ -66,7 +66,7 @@ public class ResMonitApp {
         return AvailableResTab;
     }
 
-    private static void areResStillAvail(String[][] AvailableResTab) throws UnknownHostException, IOException {
+private static void areResStillAvail(String[][] AvailableResTab) throws UnknownHostException, IOException {
         for (int i = 0; i < AvailableResTab.length; i++) {
             InetAddress address = InetAddress.getByName(AvailableResTab[i][1]);
             if (isReachableIp(address)) {
@@ -74,10 +74,11 @@ public class ResMonitApp {
                 log("resource " + AvailableResTab[i][0]
                         + " with ip : " + AvailableResTab[i][1] + " reachable");
                 /* creation de la commande a executer */
-                String cmd = "ssh " + AvailableResTab[i][2]
-                        + "@" + AvailableResTab[i][1] + " cat /proc/loadavg";
+                //String cmd = "ssh " + AvailableResTab[i][2]
+                //        + "@" + AvailableResTab[i][1] + " cat /proc/loadavg";
                 /* execution de la commande */
-                RuntimeCmd(cmd, AvailableResTab[i][0]);
+                //RuntimeCmd(cmd, AvailableResTab[i][0]);
+                getCpuUtilisation(AvailableResTab, i);
             } else {
                 /* la ressource n'a ete atteinte */
                 log("resource " + AvailableResTab[i][0]
@@ -85,6 +86,20 @@ public class ResMonitApp {
             }
         }
     }
+
+    private static int getCpuUtilisation(String[][] AvailableResTab, int res_number) throws IOException {
+        /* creation de la commande a executer */
+        String cmd = "ssh " + AvailableResTab[res_number][2]
+                + "@" + AvailableResTab[res_number][1] + " cat /proc/loadavg";
+        /* execution de la commande */
+        RuntimeCmd(cmd, AvailableResTab[res_number][0]);
+        return 0;
+    }
+
+    private static int getMemUtilisation() {
+        return 0;
+    }
+
 
     private static boolean isReachableIp(InetAddress address) throws IOException {
 
