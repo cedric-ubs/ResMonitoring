@@ -73,12 +73,8 @@ private static void areResStillAvail(String[][] AvailableResTab) throws UnknownH
                 /* la ressource a ete atteinte */
                 log("resource " + AvailableResTab[i][0]
                         + " with ip : " + AvailableResTab[i][1] + " reachable");
-                /* creation de la commande a executer */
-                //String cmd = "ssh " + AvailableResTab[i][2]
-                //        + "@" + AvailableResTab[i][1] + " cat /proc/loadavg";
-                /* execution de la commande */
-                //RuntimeCmd(cmd, AvailableResTab[i][0]);
-                getCpuUtilisation(AvailableResTab, i);
+                getCpuUsage(AvailableResTab, i);
+                getMemUsage(AvailableResTab, i);
             } else {
                 /* la ressource n'a ete atteinte */
                 log("resource " + AvailableResTab[i][0]
@@ -87,16 +83,21 @@ private static void areResStillAvail(String[][] AvailableResTab) throws UnknownH
         }
     }
 
-    private static int getCpuUtilisation(String[][] AvailableResTab, int res_number) throws IOException {
+    private static int getCpuUsage(String[][] AvailableResTab, int res_number) throws IOException {
         /* creation de la commande a executer */
         String cmd = "ssh " + AvailableResTab[res_number][2]
                 + "@" + AvailableResTab[res_number][1] + " cat /proc/loadavg";
         /* execution de la commande */
-        RuntimeCmd(cmd, AvailableResTab[res_number][0]);
+        RuntimeCmd(cmd);
         return 0;
     }
 
-    private static int getMemUtilisation() {
+    private static int getMemUsage(String[][] AvailableResTab, int res_number) throws IOException {
+        /* creation de la commande a executer */
+        String cmd = "ssh " + AvailableResTab[res_number][2]
+                + "@" + AvailableResTab[res_number][1] + " free -mt | grep Total";
+        /* execution de la commande */
+        RuntimeCmd(cmd);
         return 0;
     }
 
@@ -115,7 +116,7 @@ private static void areResStillAvail(String[][] AvailableResTab) throws UnknownH
         }
     }
 
-    private static void RuntimeCmd(String command, final String resource) throws IOException {
+    private static void RuntimeCmd(String command) throws IOException {
         Runtime runtime = Runtime.getRuntime();
         try {
             final Process process = runtime.exec(command);
@@ -124,22 +125,18 @@ private static void areResStillAvail(String[][] AvailableResTab) throws UnknownH
                 @Override
                 public void run() {
                     try {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-                        
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));             
                         String line = "";
-                        
-                        String[] loadavg = new String[3];
-                        
+                        //String[] loadavg = new String[3];
                         try {
                             while ((line = reader.readLine()) != null) {
                                 // Traitement du flux de sortie de l'application si besoin est
-                                //log("sortie : "+line);
-                                StringTokenizer st = new StringTokenizer(line);
+                                log(line);
+                                /*StringTokenizer st = new StringTokenizer(line);
                                 for(int i=0;i<3;i++){
                                     loadavg[i] = st.nextToken();
-                                    log(resource+" : charge CPU% = "+loadavg[i]);
-                                    /* Next step is to modify the ontology file */
-                                }
+                                    log(resource+" : charge CPU% = "+loadavg[i]);        
+                                }*/
                             }
                         } finally {
                             reader.close();
@@ -171,7 +168,6 @@ private static void areResStillAvail(String[][] AvailableResTab) throws UnknownH
             }.start();
         } catch (IOException e) {
         }
-
     }
 
     private static void log(Object aObject) {
