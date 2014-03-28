@@ -66,7 +66,7 @@ public class ResMonitApp {
         return AvailableResTab;
     }
 
-private static void areResStillAvail(String[][] AvailableResTab) throws UnknownHostException, IOException {
+    private static void areResStillAvail(String[][] AvailableResTab) throws UnknownHostException, IOException {
         for (int i = 0; i < AvailableResTab.length; i++) {
             InetAddress address = InetAddress.getByName(AvailableResTab[i][1]);
             if (isReachableIp(address)) {
@@ -83,24 +83,43 @@ private static void areResStillAvail(String[][] AvailableResTab) throws UnknownH
         }
     }
 
-    private static int getCpuUsage(String[][] AvailableResTab, int res_number) throws IOException {
+    private static float getCpuUsage(String[][] AvailableResTab, int res_number) throws IOException {
+        String line = "";
         /* creation de la commande a executer */
         String cmd = "ssh " + AvailableResTab[res_number][2]
                 + "@" + AvailableResTab[res_number][1] + " cat /proc/loadavg";
         /* execution de la commande */
-        RuntimeCmd(cmd);
-        return 0;
+        line = RuntimeCmd(cmd);
+        String[] loadavg = new String[3];
+        StringTokenizer st = new StringTokenizer(line);
+        for(int i=0;i<3;i++){
+            loadavg[i] = st.nextToken();
+        }
+        float fCpu = Float.parseFloat(loadavg[0]);
+        log("CPUavg = "+fCpu);
+        return fCpu;
     }
 
-    private static int getMemUsage(String[][] AvailableResTab, int res_number) throws IOException {
+    private static float getMemUsage(String[][] AvailableResTab, int res_number) throws IOException {
+        String line = "";
         /* creation de la commande a executer */
         String cmd = "ssh " + AvailableResTab[res_number][2]
                 + "@" + AvailableResTab[res_number][1] + " free -mt | grep Total";
         /* execution de la commande */
-        RuntimeCmd(cmd);
-        return 0;
+        line = RuntimeCmd(cmd);
+        String[] memusage = new String[3];
+        StringTokenizer st = new StringTokenizer(line);
+        for(int i=0;i<3;i++){
+            memusage[i] = st.nextToken();
+        }
+        float TotalMem = Float.parseFloat(memusage[1]);
+                log("TotalMem = "+TotalMem);
+        float UsedMem = Float.parseFloat(memusage[2]);
+                log("UsedMem = "+UsedMem);
+        float fMem = UsedMem/TotalMem;
+        log("MEMavg = "+fMem);
+        return fMem;
     }
-
 
     private static boolean isReachableIp(InetAddress address) throws IOException {
 
@@ -116,58 +135,18 @@ private static void areResStillAvail(String[][] AvailableResTab) throws UnknownH
         }
     }
 
-    private static void RuntimeCmd(String command) throws IOException {
+    private static String RuntimeCmd(String command) throws IOException {
         Runtime runtime = Runtime.getRuntime();
-        try {
-            final Process process = runtime.exec(command);
-            // Consommation de la sortie standard de l'application externe dans un Thread separe
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));             
-                        String line = "";
-                        //String[] loadavg = new String[3];
-                        try {
-                            while ((line = reader.readLine()) != null) {
-                                // Traitement du flux de sortie de l'application si besoin est
-                                log(line);
-                                /*StringTokenizer st = new StringTokenizer(line);
-                                for(int i=0;i<3;i++){
-                                    loadavg[i] = st.nextToken();
-                                    log(resource+" : charge CPU% = "+loadavg[i]);        
-                                }*/
-                            }
-                        } finally {
-                            reader.close();
-                        }
-                    } catch (IOException ioe) {
-                        ioe.printStackTrace();
-                    }
-                }
-            }.start();
-            // Consommation de la sortie d'erreur de l'application externe dans un Thread separe
-            new Thread() {
-                @Override
-                public void run() {
-                    try {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-                        String line = "";
-                        try {
-                            while ((line = reader.readLine()) != null) {
-                                // Traitement du flux d'erreur de l'application si besoin est
-                                log("erreur : "+line);
-                            }
-                        } finally {
-                            reader.close();
-                        }
-                    } catch (IOException ioe) {
-                        ioe.printStackTrace();
-                    }
-                }
-            }.start();
-        } catch (IOException e) {
+        final Process process = runtime.exec(command);
+        // Consommation de la sortie standard de l'application externe
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line = "";
+        while ((line = reader.readLine()) != null) {
+            // Traitement du flux de sortie de l'application si besoin est
+            //log(line);
+            break;
         }
+        return line;
     }
 
     private static void log(Object aObject) {
