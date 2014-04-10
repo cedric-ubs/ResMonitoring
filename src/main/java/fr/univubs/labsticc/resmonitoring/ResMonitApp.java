@@ -1,6 +1,10 @@
 package fr.univubs.labsticc.resmonitoring;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
@@ -97,6 +101,7 @@ public class ResMonitApp {
         }
         float fCpu = Float.parseFloat(loadavg[0]);
         log("CPUavg = "+fCpu);
+        // Ecrire la valeur dans l'ontologie
         return fCpu;
     }
 
@@ -113,14 +118,23 @@ public class ResMonitApp {
             memusage[i] = st.nextToken();
         }
         float TotalMem = Float.parseFloat(memusage[1]);
-                log("TotalMem = "+TotalMem);
+                //log("TotalMem = "+TotalMem);
         float UsedMem = Float.parseFloat(memusage[2]);
-                log("UsedMem = "+UsedMem);
+                //log("UsedMem = "+UsedMem);
         float fMem = UsedMem/TotalMem;
         log("MEMavg = "+fMem);
+        // Ecrire la valeur dans l'ontologie
         return fMem;
     }
 
+    private static void setCpuValue() throws FileNotFoundException{
+
+    }
+    
+    private static void setMemValue(){
+        
+    }
+    
     private static boolean isReachableIp(InetAddress address) throws IOException {
 
         if (address.isReachable(5)) {   // milliseconde
