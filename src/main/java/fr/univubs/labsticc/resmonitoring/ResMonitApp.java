@@ -89,10 +89,9 @@ public class ResMonitApp {
 
     private static float getCpuUsage(String[][] AvailableResTab, int res_number) throws IOException {
         String line = "";
-        /* creation de la commande a executer */
-        String cmd = "ssh " + AvailableResTab[res_number][2]
+       
+        /*String cmd = "ssh " + AvailableResTab[res_number][2]
                 + "@" + AvailableResTab[res_number][1] + " cat /proc/loadavg";
-        /* execution de la commande */
         line = RuntimeCmd(cmd);
         String[] loadavg = new String[3];
         StringTokenizer st = new StringTokenizer(line);
@@ -100,9 +99,15 @@ public class ResMonitApp {
             loadavg[i] = st.nextToken();
         }
         float fCpu = Float.parseFloat(loadavg[0]);
-        log("CPUavg = "+fCpu);
-        // Ecrire la valeur dans l'ontologie
-        return fCpu;
+        log("CPUavg = "+fCpu);*/
+        
+        String cmd = "ssh " + AvailableResTab[res_number][2]
+                + "@" + AvailableResTab[res_number][1] 
+                + " top -b -n 2 -d 1 | grep \"Cpu(s)\" | tail -n 1 | awk '{print $2+$4+$6}'";
+        //log("CMD = "+cmd);
+        line = RuntimeCmd(cmd);
+        log("CPUavg = "+line);
+        return 0;
     }
 
     private static float getMemUsage(String[][] AvailableResTab, int res_number) throws IOException {
